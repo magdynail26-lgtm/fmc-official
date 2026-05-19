@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FMC ECOSYSTEM - STABLE VERSION 37</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --p: #7c3aed; --c: #00f2ff; --g: #39ff14; --gold: #ffd700; --red: #ff0055; --bg: #02000f; --ton: #0088cc; --card-bg: rgba(10, 6, 36, 0.7); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; touch-action: manipulation; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; min-height: 100vh; display: flex; flex-direction: column; user-select: none; -webkit-user-select: none; overflow-x: hidden; }
+        
+        header { height: 70px; background: rgba(2, 0, 15, 0.95); border-bottom: 1px solid rgba(0, 242, 255, 0.2); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 9999999 !important; position: relative; }
+        .header-stats { display: flex; gap: 12px; align-items: center; }
+        .stat-v { text-align: center; }
+        .stat-v span { display: block; font-size: 10px; color: var(--c); font-weight: 900; }
+        .stat-v b { font-size: 14px; }
+        .header-actions { display: flex; gap: 8px; align-items: center; position: relative; z-index: 9999999 !important; }
+        .btn-lang-globe { background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.4); width: 38px; height: 38px; border-radius: 10px; color: var(--c); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+        
+        .lang-dropdown { display: none; flex-direction: column; position: absolute; top: 55px; left: 0; background: rgba(5, 2, 25, 0.98); border: 1px solid var(--c); border-radius: 14px; padding: 6px; gap: 4px; z-index: 99999999; max-height: 280px; overflow-y: auto; width: 150px; box-shadow: 0 4px 20px rgba(0,242,255,0.3); }
+        .dropdown-item { padding: 8px 10px; font-size: 11px; font-weight: 900; color: #fff; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 6px; }
+        .dropdown-item:hover { background: var(--p); color: var(--c); }
+        
+        .btn-connect { background: linear-gradient(135deg, #0088cc, #0077b5); border: 1px solid rgba(0, 242, 255, 0.2); padding: 8px 12px; border-radius: 10px; color: white; font-size: 11px; font-weight: 900; cursor: pointer; }
+        .btn-connect.connected { background: linear-gradient(135deg, var(--g), #16a34a); border-color: rgba(57, 25, 20, 0.4); color: #000 !important; }
+
+        .main-container { flex: 1; position: relative; width: 100%; overflow: hidden; z-index: 10; padding-bottom: 85px; }
+        .page-room { position: absolute; inset: 0; width: 100%; height: 100%; display: none; flex-direction: column; padding: 16px; background: var(--bg); z-index: 20; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .page-room.active { display: flex; }
+
+        .card-shop-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 15px; width: 100%; }
+        .shop-card-item { background: linear-gradient(135deg, #130b3a 0%, #06021f 100%); border: 1.5px solid rgba(124, 58, 237, 0.4); border-radius: 16px; padding: 10px 4px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; align-items: center; min-height: 125px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15); }
+        .shop-card-item h5 { font-size: 10px; font-weight: 900; color: #fff; }
+        .shop-card-item span { font-size: 9px; color: var(--gold); display: block; margin-bottom: 4px; font-weight: bold; }
+        .btn-buy-card-coin { width: 100%; height: 24px; border-radius: 6px; background: var(--p); border: none; color: #fff; font-size: 9px; font-weight: 900; cursor: pointer; }
+        .btn-buy-card-ton { width: 100%; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #0088cc, #006699); border: none; color: #fff; font-size: 9px; font-weight: 900; cursor: pointer; margin-top: 4px; }
+        
+        .clicker-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px 0; position: relative; }
+        .mining-circle-mega { width: 135px; height: 135px; background: radial-gradient(circle, #100b3a 0%, #030014 100%); border: 3px solid var(--c); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; box-shadow: 0 0 30px var(--c); cursor: pointer; }
+        .mining-circle-mega span { font-size: 9px; color: var(--g); letter-spacing: 2px; margin-top: -2px; font-weight: 900; }
+        .energy-box { margin-top: 12px; font-size: 12px; font-weight: bold; color: #94a3b8; }
+        .gift-box-badge { position: absolute; top: 0; right: 20px; width: 45px; height: 45px; background: var(--gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; box-shadow: 0 0 15px var(--gold); }
+        .btn-upgrade-hub { width: 100%; height: 48px; border-radius: 14px; background: linear-gradient(135deg, var(--p), #4c1d95); border: 1px solid var(--c); color: white; font-weight: 900; font-size: 13px; cursor: pointer; margin-top: 10px; }
+
+        .farm-card-box { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .farm-card-mini { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--card-bg); border: 1px solid rgba(188,19,254,0.2); border-radius: 20px; }
+        .farm-info { flex: 1; text-align: left; }
+        .farm-info h4 { color: #fff; font-size: 13px; font-weight: 900; }
+        .farm-info p { color: #39ff14; font-size: 11px; margin-top: 3px; font-weight: bold; }
+        .btn-buy-ton { padding: 8px 16px; background: linear-gradient(180deg, #0088cc, #006699); border: none; border-radius: 12px; color: white; font-weight: 900; font-size: 12px; cursor: pointer; min-width: 95px; text-align: center; }
+        .btn-buy-ton.active-upgrade { background: linear-gradient(180deg, var(--g), #16a34a) !important; color: #000 !important; cursor: default; }
+
+        .arcade-headline { font-size: 16px; font-weight: 900; color: var(--c); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .arcade-game-card { background: linear-gradient(145deg, rgba(15, 10, 45, 0.6), rgba(2, 1, 12, 0.95)); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 24px; padding: 18px; margin-bottom: 15px; display: flex; flex-direction: column; cursor: pointer; }
+        .arcade-card-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .arcade-icon-box { width: 55px; height: 55px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+        .btn-arcade-play { width: 100%; height: 44px; border-radius: 12px; border: none; background: linear-gradient(180deg, var(--p), #4c1d95); color: #fff; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(124,58,237,0.3); }
+
+        .slot-housing { background: linear-gradient(145deg, #120734, #050114); border: 3px solid #250e55; border-radius: 24px; padding: 12px; position: relative; }
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #000; padding: 8px; border-radius: 16px; border: 1px solid var(--p); position: relative; }
+        .grid-cell { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); height: 75px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 34px; position: relative; z-index: 5; }
+        #slot-canvas { position: absolute; inset: 0; z-index: 99; pointer-events: none; width: 100%; height: 100%; }
+
+        .sky { height: 45vh; min-height: 320px; border-radius: 24px; position: relative; overflow: hidden; border: 2px solid var(--c); background: #000; margin-bottom: 10px; box-shadow: inset 0 0 40px rgba(0,242,255,0.3); }
+        .cyber-city { position: absolute; inset: 0; width: 100%; height: 200%; background: linear-gradient(to top, #0c0429 0%, #030112 50%, #000000 100%); background-image: url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?q=80&w=600&auto=format&fit=crop'); background-repeat: repeat-y; background-size: cover; background-position: center bottom; filter: brightness(0.55) contrast(1.1); }
+        
+        .mult-v { position: absolute; top: 15%; left: 0; width: 100%; text-align: center; font-size: 44px; font-weight: 900; z-index: 99; font-family: 'Impact', sans-serif; letter-spacing: 1px; }
+        .pulse-heart-glow { animation: heartbeatGlow 0.22s infinite alternate ease-in-out; }
+        
+        #rocket-container { position: absolute; bottom: 30px; left: calc(50% - 32px); width: 64px; height: 130px; z-index: 99; display: flex; flex-direction: column; align-items: center; }
+        .vector-rocket { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0,242,255,0.8)); }
+        .jet-flame { width: 18px; height: 45px; background: linear-gradient(to bottom, var(--gold), var(--red), transparent); border-radius: 50%; box-shadow: 0 0 25px var(--red); display: none; margin-top: -15px; }
+        #rocket-boom-text { position: absolute; font-size: 44px; font-weight: 900; color: var(--red); text-shadow: 0 0 15px var(--red); z-index: 999; display: none; font-family: 'Impact', sans-serif; }
+
+        .game-status-toast { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); padding: 14px 28px; border-radius: 18px; font-size: 22px; font-weight: 900; text-align: center; z-index: 99999; display: none; backdrop-filter: blur(12px); box-shadow: 0 0 35px rgba(0,0,0,0.85); font-family: 'Impact', sans-serif; }
+        .toast-winner { border: 2.5px solid var(--g); color: var(--g); text-shadow: 0 0 10px var(--g); background: rgba(57, 25, 20, 0.18); box-shadow: 0 0 25px rgba(57,25,20,0.4); }
+        .toast-loser { border: 2.5px solid var(--red); color: var(--red); text-shadow: 0 0 10px var(--red); background: rgba(255, 0, 85, 0.18); box-shadow: 0 0 25px rgba(255,0,85,0.4); }
+
+        .daily-modal { display: none; flex-direction: column; background: rgba(13, 8, 48, 0.95); border: 2px solid var(--gold); border-radius: 24px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 25px rgba(255,215,0,0.2); }
+        .daily-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+        .daily-day-box { background: linear-gradient(135deg, #1e1b4b, #090520); border: 1.5px solid #334155; padding: 10px 2px; border-radius: 14px; text-align: center; font-size: 11px; font-weight: 900; color: #94a3b8; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 75px; }
+        .daily-day-box i { font-size: 20px; color: #64748b; margin-bottom: 4px; }
+        .daily-day-box.active-day { border-color: var(--gold); box-shadow: 0 0 12px var(--gold); color: var(--gold); }
+        .daily-day-box.active-day i { color: var(--gold) !important; }
+        .daily-day-box.claimed { border-color: var(--g) !important; color: var(--g) !important; }
+        .daily-day-box.claimed i { color: var(--g) !important; }
+
+        .puzzle-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 20px; padding: 14px; margin-bottom: 15px; text-align: center; }
+        .puzzle-slots { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+        .puzzle-piece { width: 85px; height: 45px; border-radius: 12px; background: #040114; border: 2px dashed #221a4a; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #475569; }
+        .puzzle-piece.collected { background: rgba(57, 25, 20, 0.1) !important; border: 2px solid var(--g) !important; color: var(--g) !important; text-shadow: 0 0 8px var(--g); }
+        
+        .tasks-scroll-zone { display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 250px); overflow-y: auto; padding-right: 4px; }
+        .task-card { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--card-bg); border: 1px solid rgba(0, 242, 255, 0.12); border-radius: 16px; }
+        .task-left h4 { font-size: 13px; font-weight: 900; color: #fff; }
+        .task-left p { font-size: 11px; color: var(--gold); font-weight: bold; margin-top: 2px; }
+        .btn-watch { padding: 8px 18px; background: var(--c); border: none; border-radius: 10px; color: #000; font-weight: 900; font-size: 12px; cursor: pointer; }
+
+        .ref-header-info { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 242, 255, 0.05); padding: 14px; border-radius: 16px; border: 1px dashed rgba(0, 242, 255, 0.3); margin-bottom: 15px; }
+        .ref-header-info h4 { font-size: 13px; color: #fff; font-weight: 900; display: flex; align-items: center; gap: 6px; }
+        .ref-list-box { display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 220px); overflow-y: auto; }
+        .ref-item-card { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--card-bg); border: 1px solid rgba(0, 242, 255, 0.12); border-radius: 16px; box-shadow: 0 2px 8px rgba(0,242,255,0.05); }
+        .ref-card-left { display: flex; align-items: center; gap: 10px; }
+        .ref-icon-badge { width: 36px; height: 36px; border-radius: 10px; background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--gold); }
+        .ref-card-left-info b { font-size: 13px; color: #fff; display: block; }
+        .ref-reward-tag { font-size: 12px; color: var(--g); font-weight: 900; }
+
+        .wallet-row { background: rgba(5, 2, 25, 0.6); border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 18px; padding: 15px; margin-bottom: 12px; }
+        .wallet-title { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 14px; margin-bottom: 8px; }
+        .wallet-input { width: 100%; height: 44px; background: #000 !important; border: 2px solid var(--c) !important; border-radius: 12px; color: var(--g) !important; font-weight: bold; padding: 0 14px; font-size: 13px; text-align: left; }
+        .btn-save-addresses-neon { width: 100%; height: 48px; border-radius: 14px; background: #030014; border: 2px solid var(--c); color: var(--c); font-size: 14px; font-weight: 900; box-shadow: 0 0 15px rgba(0,242,255,0.4); margin-top: 15px; cursor: pointer; }
+
+        .greedy-container-wrapper { display: flex; flex-direction: column; width: 100%; height: 100%; justify-content: flex-start; }
+        .greedy-top-dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 5px; }
+        .greedy-top-dash .greedy-dash-card { background: rgba(5, 2, 25, 0.75); border: 1.5px solid #221a4a; border-radius: 14px; padding: 8px 2px; text-align: center; }
+        .greedy-top-dash .greedy-dash-card span { display: block; font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; }
+        .greedy-top-dash .greedy-dash-card b { font-size: 14px; font-weight: bold; }
+        
+        .greedy-stage { width: 100%; max-width: 270px; height: 260px; position: relative; margin: 30px auto 10px auto; display: flex; align-items: center; justify-content: center; }
+        .greedy-node { width: 52px; height: 52px; background: #ffffff !important; border: 3.5px solid #475569 !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; position: absolute; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .greedy-node.active-spin { border-color: var(--g) !important; background: var(--g) !important; box-shadow: 0 0 25px var(--g) !important; transform: scale(1.15); z-index: 99; }
+        .greedy-center-badge { width: 85px; height: 85px; background: #000; border: 3px solid var(--c); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: 900; color: var(--c); box-shadow: 0 0 15px rgba(0,242,255,0.3); }
+        .node-red-bet { position: absolute; top: -18px; background: #000; border: 1px solid var(--red); color: #ff0055 !important; font-size: 9px; font-weight: 900; padding: 1px 4px; border-radius: 5px; display: none; z-index: 999; }
+        .node-mult-badge { position: absolute; bottom: -12px; background: #eab308; color: #000 !important; font-size: 9px; font-weight: 900; padding: 1px 4px; border-radius: 5px; }
+        
+        .greedy-bottom-controls-group { width: 100%; display: flex; flex-direction: column; gap: 4px; margin-top: auto; }
+        .greedy-bet-bar { display: flex; justify-content: center; gap: 6px; background: rgba(5,2,25,0.4); padding: 8px; border-radius: 18px; border: 1px solid #110d33; margin-top: 0px; align-items: center; }
+        .btn-coin-select { padding: 6px 12px; background: rgba(255,255,255,0.03); border: 1.5px solid #334155; border-radius: 12px; color: #fff; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-coin-select.selected-bet-chip { border-color: #eab308 !important; color: #eab308 !important; background: rgba(234,179,8,0.05); box-shadow: 0 0 10px rgba(234,179,8,0.3); }
+        .greedy-custom-input { width: 55px; height: 35px; background: #000; border: 1.5px dashed var(--gold); border-radius: 10px; color: #fff; text-align: center; font-size: 11px; }
+        .btn-other-ok-neon { padding: 6px 10px; background: var(--p); border: none; border-radius: 10px; color: #fff; font-weight: 900; font-size: 11px; cursor: pointer; box-shadow: 0 0 10px var(--p); }
+
+        .greedy-full-history-bar { display: flex; gap: 8px; overflow-x: auto; padding: 8px 12px; background: rgba(13, 6, 48, 0.75); border-radius: 14px; border: 1px solid rgba(0, 242, 255, 0.15); margin-top: 4px; min-height: 44px; align-items: center; width: 100% !important; white-space: nowrap; -webkit-overflow-scrolling: touch; box-shadow: inset 0 0 15px rgba(0,0,0,0.6); backdrop-filter: blur(8px); }
+        .greedy-full-history-bar .hist-chip { padding: 4px 10px; background: rgba(5, 2, 25, 0.9); border-radius: 10px; font-size: 11px; font-weight: 900; border: 1px solid rgba(255,255,255,0.06); color: #cbd5e1; display: inline-block; flex-shrink: 0; }
+        .greedy-full-history-bar .hist-chip.win { border-color: var(--g) !important; color: var(--g) !important; background: rgba(57, 25, 20, 0.1) !important; box-shadow: 0 0 10px rgba(57,25,20,0.25); text-shadow: 0 0 4px var(--g); }
+
+        .luxury-premium-bet-panel { display: flex; justify-content: space-between; align-items: center; width: 100%; background: rgba(10, 6, 36, 0.85); padding: 12px 14px 10px 14px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.25); box-shadow: 0 4px 15px rgba(0,0,0,0.6); margin-top: 10px; position: relative; }
+        .luxury-btn-unit-box { display: flex; flex-direction: column; align-items: center; width: 35%; gap: 4px; }
+        .luxury-btn-unit-box.right-side { align-items: center; }
+        .capsule-label-text-top { font-size: 9px; font-weight: 900; color: var(--c); text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 4px var(--c); }
+        .capsule-row-flex-controls { display: flex; align-items: center; gap: 10px; }
+        
+        .btn-neon-luxury-capsule { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1e1b4b, #0c0728); border: 2.5px solid var(--c); color: var(--c); font-size: 18px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 8px rgba(0,242,255,0.3); }
+        .btn-neon-luxury-capsule:active { transform: scale(0.9); border-color: var(--g); color: var(--g); box-shadow: 0 0 12px var(--g); }
+        .luxury-numeric-display-bold { font-size: 18px; font-weight: 900; color: #ffffff; font-family: 'Impact', sans-serif; text-shadow: 0 0 6px #fff, 0 0 12px var(--c); min-width: 45px; text-align: center; }
+        .btn-luxury-center-gold-mega { flex: 1; max-width: 130px; height: 46px; border-radius: 16px; background: linear-gradient(180deg, #ffd700 0%, #b45309 100%); border: 2.5px solid #fff; color: #000; font-size: 15px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 1px rgba(255,255,255,0.5); box-shadow: 0 0 20px rgba(255,215,0,0.4); margin-top: 10px; }
+
+        nav { height: 70px; background: #02000f; border-top: 1px solid rgba(0, 242, 255, 0.15); display: flex; justify-content: space-around; align-items: center; z-index: 999999; position: relative; margin-top: auto; }
+        .nav-i { text-align: center; color: #444; font-size: 10px; font-weight: 900; cursor: pointer; list-style: none; width: 20%; }
+        .nav-i.active { color: var(--c); text-shadow: 0 0 10px var(--c); }
+        .nav-i i { font-size: 20px; margin-bottom: 4px; display: block; }
+    </style>
+</head>
+<body>
+
+<div id="global-winner-toast" class="game-status-toast toast-winner">🎉 WINNER +0 FMC</div>
+<div id="global-loser-toast" class="game-status-toast toast-loser">💔 LOSER</div>
+
+<header>
+    <div class="header-stats">
+        <div class="stat-v"><span>Balance</span> <b id="b-v">0</b></div>
+        <div class="stat-v" style="border-left:1px solid #222; padding-left:15px;"><span>Cards</span> <b id="c-v">0</b></div>
+    </div>
+    <div class="header-actions">
+        <button class="btn-lang-globe" onclick="window.toggleLanguageDropdown()"><i class="fas fa-globe"></i></button>
+        <button class="btn-connect" id="ton-connect-btn" onclick="window.connectTonWallet()">
+            <i class="fas fa-wallet"></i> <span id="connect-text">Connect Wallet</span>
+        </button>
+    </div>
+    <div class="lang-dropdown" id="real-lang-dropdown">
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('en')">🇬🇧 English</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('ar')">🇪🇬 عـربي</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('ru')">🇷🇺 Русский</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('tr')">🇹🇷 Türkçe</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('de')">🇩🇪 Deutsch</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('hi')">🇮🇳 हिन्दी</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('ur')">🇵🇰 اردو</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('es')">🇪🇸 Español</div>
+        <div class="dropdown-item" onclick="window.changeLanguageEngine('fr')">🇫🇷 Français</div>
+    </div>
+</header>
+
+<div class="main-container">
+    <div id="room-mining" class="page-room active">
+        <div class="daily-modal" id="daily-login-hub">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <b>🎁 Daily Login Reward</b>
+                <i class="fas fa-times-circle" style="color:var(--red); cursor:pointer;" onclick="window.toggleGiftModal()"></i>
+            </div>
+            <div class="daily-grid" id="daily-days-grid-box"></div>
+        </div>
+        
+        <p style="font-size: 11px; color: var(--c); font-weight: 900; margin-bottom: 5px;">🛒 Card Shop (Coins / TON):</p>
+        <div class="card-shop-box">
+            <div class="shop-card-item"><h5>2 Cards</h5><span>25K coins</span><button class="btn-buy-card-coin" onclick="window.buyCardsWithCoins(2, 25000)">Buy</button><button class="btn-buy-card-ton" onclick="window.buyCardsWithTon(2, 0.1)">0.1 TON</button></div>
+            <div class="shop-card-item"><h5>5 Cards</h5><span>60K coins</span><button class="btn-buy-card-coin" onclick="window.buyCardsWithCoins(5, 60000)">Buy</button><button class="btn-buy-card-ton" onclick="window.buyCardsWithTon(5, 0.2)">0.2 TON</button></div>
+            <div class="shop-card-item"><h5>8 Cards</h5><span>90K coins</span><button class="btn-buy-card-coin" onclick="window.buyCardsWithCoins(8, 90000)">Buy</button><button class="btn-buy-card-ton" onclick="window.buyCardsWithTon(8, 0.3)">0.3 TON</button></div>
+        </div>
+        
+        <div class="clicker-layout">
+            <div class="gift-box-badge" onclick="window.toggleGiftModal()">🎁</div>
+            <div class="mining-circle-mega" onclick="window.tapClickerMega()">FMC<span>MINING</span></div>
+            <div class="energy-box"><i class="fas fa-bolt"></i> <span id="eg-v">500</span> / 500</div>
+        </div>
+        <button class="btn-upgrade-hub" onclick="window.switchMainTab('upgrade-room')">UPGRADE MINING FARMS</button>
+    </div>
+
+    <div id="room-upgrade-room" class="page-room">
+        <div onclick="window.switchMainTab('mining')" style="color:var(--c); font-weight:900; margin-bottom:15px; cursor:pointer;"><i class="fas fa-arrow-right"></i> Back</div>
+        <h3>Activate Cloud Mining Speed:</h3>
+        <div class="farm-card-box">
+            <div class="farm-card-mini"><div class="farm-info"><h4>🛸 Cloud System 0.10 TON</h4><p>Speed: +5,000 daily</p></div><button class="btn-buy-ton" id="b-ton0" onclick="window.buyUpgradeWithTon(0, 0.10, 58, 2)">0.10 TON</button></div>
+            <div class="farm-card-mini"><div class="farm-info"><h4>🛸 Cloud System 0.25 TON</h4><p>Speed: +15,000 daily</p></div><button class="btn-buy-ton" id="b-ton1" onclick="window.buyUpgradeWithTon(1, 0.25, 174, 5)">0.25 TON</button></div>
+            <div class="farm-card-mini"><div class="farm-info"><h4>🛸 Cloud System 0.50 TON</h4><p>Speed: +35,000 daily</p></div><button class="btn-buy-ton" id="b-ton2" onclick="window.buyUpgradeWithTon(2, 0.50, 405, 15)">0.50 TON</button></div>
+            <div class="farm-card-mini"><div class="farm-info"><h4>🛸 Cloud System 1.00 TON</h4><p>Speed: +60,000 daily</p></div><button class="btn-buy-ton" id="b-ton3" onclick="window.buyUpgradeWithTon(3, 1.00, 694, 35)">1.00 TON</button></div>
+            <div class="farm-card-mini"><div class="farm-info"><h4>🛸 Cloud System 2.00 TON</h4><p>Speed: +150,000 daily</p></div><button class="btn-buy-ton" id="b-ton4" onclick="window.buyUpgradeWithTon(4, 2.00, 1736, 70)">2.00 TON</button></div>
+        </div>
+    </div>
+
+    <div id="room-games" class="page-room">
+        <h2 class="arcade-headline"><i class="fas fa-store"></i> CYBER CASINO STORE</h2>
+        <div class="arcade-game-card" onclick="window.enterGame('slot')">
+            <div class="arcade-card-top"><div class="arcade-icon-box" style="color: var(--p); background: rgba(188,19,254,0.1);">🎰</div><div><h3>YUMMY SLOTS MACHINE</h3><p>Hit lines and win Jackpot!</p></div></div><button class="btn-arcade-play" onclick="window.enterGame('slot')">PLAY NOW</button>
+        </div>
+        <div class="arcade-game-card" onclick="window.enterGame('greedy')">
+            <div class="arcade-card-top"><div class="arcade-icon-box" style="color: var(--gold); background: rgba(255,215,0,0.1);">🍀</div><div><h3>MEAT & VEG NEON ARENA</h3><p>Predict items on 8 nodes, Win up to 25x payout!</p></div></div><button class="btn-arcade-play" onclick="window.enterGame('greedy')">PLAY NOW</button>
+        </div>
+        <div class="arcade-game-card" onclick="window.enterGame('rocket')">
+            <div class="arcade-card-top"><div class="arcade-icon-box" style="color: var(--c); background: rgba(0,242,255,0.1);">🚀</div><div><h3>ROCKET CRASH RIDE</h3><p>Launch rocket and cash out before crash!</p></div></div><button class="btn-arcade-play" onclick="window.enterGame('rocket')">PLAY NOW</button>
+        </div>
+    </div>
+
+    <div id="room-game-slot" class="page-room">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
+            <div onclick="window.exitToMenu()" style="color:var(--red); font-weight:900; cursor:pointer;">❌ EXIT</div>
+            <div style="background:rgba(255,255,255,0.04); padding:4px 12px; border-radius:10px; border:1px solid rgba(0,242,255,0.2); font-size:12px;">🎰 SLOTS PROFIT: <b id="slot-profit-v" style="color:var(--g)">0</b></div>
+        </div>
+        <div class="slot-housing">
+            <div class="grid-container-relative">
+                <canvas id="slot-canvas"></canvas>
+                <div class="grid-3x3" id="slot-grid-parent">
+                    <div class="grid-cell" id="c0">🍉</div><div class="grid-cell" id="c1">🍋</div><div class="grid-cell" id="c2">🍒</div>
+                    <div class="grid-cell" id="c3">🍎</div><div class="grid-cell" id="c4">🍇</div><div class="grid-cell" id="c5">💎</div>
+                    <div class="grid-cell" id="c6">🍔</div><div class="grid-cell" id="c7">🔔</div><div class="grid-cell" id="c8">🎰</div>
+                </div>
+            </div>
+        </div>
+        <div class="greedy-full-history-bar" id="slot-hist-bar"></div>
+        
+        <div class="luxury-premium-bet-panel">
+            <div class="luxury-btn-unit-box">
+                <span class="capsule-label-text-top">LINES</span>
+                <div class="capsule-row-flex-controls">
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeLines(-1)">-</button>
+                    <div class="luxury-numeric-display-bold" id="sL-v-internal">1</div>
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeLines(1)">+</button>
+                </div>
+            </div>
+            <button id="spin-btn" class="btn-luxury-center-gold-mega" onclick="window.spinSlot()">SPIN</button>
+            <div class="luxury-btn-unit-box right-side">
+                <span class="capsule-label-text-top">BET COIN</span>
+                <div class="capsule-row-flex-controls">
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeBet(-50)">-</button>
+                    <div class="luxury-numeric-display-bold" id="sB-v-internal">50</div>
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeBet(50)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="room-game-greedy" class="page-room">
+        <div onclick="window.exitToMenu()" style="color:var(--red); font-weight:900; margin-bottom:4px; cursor:pointer; font-size:12px;">❌ EXIT</div>
+        <div class="greedy-container-wrapper">
+            <div class="greedy-top-dash">
+                <div class="greedy-dash-card" style="border-color: #b45309;"><span>TIMER</span><b id="greedy-timer-v" style="color:#f59e0b;">30</b></div>
+                <div class="greedy-dash-card" style="border-color: #06b6d4;"><span>WALLET</span><b id="greedy-wallet-v">0</b></div>
+                <div class="greedy-dash-card" style="border-color: #10b981;"><span>GREEDY PROFIT</span><b id="greedy-profit-v" style="color:var(--g)">0</b></div>
+            </div>
+            <div class="greedy-stage">
+                <div id="greedy-circle-arena" style="position:absolute; inset:0;"></div>
+                <div class="greedy-center-badge">FMC<br><span style="color:#00f2ff;">LUCKY</span></div>
+            </div>
+            <div class="greedy-bottom-controls-group">
+                <div class="greedy-bet-bar">
+                    <button class="btn-coin-select selected-bet-chip" onclick="window.setGreedyBetChip(10, this)">10</button>
+                    <button class="btn-coin-select" onclick="window.setGreedyBetChip(100, this)">100</button>
+                    <button class="btn-coin-select" onclick="window.setGreedyBetChip(1000, this)">1K</button>
+                    <button class="btn-coin-select" onclick="window.setGreedyBetChip(5000, this)">5K</button>
+                    <input type="number" class="greedy-custom-input" id="greedy-custom-input-field" placeholder="Other">
+                    <button class="btn-other-ok-neon" onclick="window.confirmCustomOtherBet()">OK</button>
+                </div>
+                <div class="greedy-full-history-bar" id="greedy-hist-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="room-game-rocket" class="page-room">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:4px;">
+            <div onclick="window.exitToMenu()" style="color:var(--red); font-weight:900; cursor:pointer; font-size:12px;">❌ EXIT</div>
+            <div style="background:rgba(255,255,255,0.04); padding:4px 12px; border-radius:10px; border:1px solid rgba(0,242,255,0.2); font-size:12px;">🚀 ROCKET PROFIT: <b id="rocket-profit-v" style="color:var(--g)">0</b></div>
+        </div>
+        <div class="sky" id="rocket-sky-view-cinema">
+            <div class="cyber-city" id="city"></div>
+            <div class="mult-v pulse-heart-glow" id="ro-mult" style="color:var(--g);">1.00x</div>
+            <div id="rocket-boom-text">💥 BOOM</div>
+
+            <div id="rocket-container">
+                <svg class="vector-rocket" viewBox="0 0 64 120">
+                    <path d="M32,5 Q48,35 48,90 L16,90 Q16,35 32,5 Z" fill="#cbd5e1" stroke="#00f2ff" stroke-width="2.5"/>
+                    <path d="M16,70 Q2,85 6,105 L16,100 Z" fill="#7c3aed" stroke="#00f2ff" stroke-width="1.5"/>
+                    <path d="M48,70 Q62,85 58,105 L48,100 Z" fill="#7c3aed" stroke="#00f2ff" stroke-width="1.5"/>
+                    <circle cx="32" cy="40" r="7" fill="#00f2ff" stroke="#02000f" stroke-width="1.5"/>
+                </svg>
+                <div class="jet-flame" id="rocket-flame"></div>
+            </div>
+        </div>
+        
+        <div class="greedy-full-history-bar" id="rocket-hist-bar"></div>
+        
+        <div class="luxury-premium-bet-panel">
+            <div class="luxury-btn-unit-box">
+                <span class="capsule-label-text-top">BET COIN</span>
+                <div class="capsule-row-flex-controls">
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeRocketBet(-100)">-</button>
+                    <div class="luxury-numeric-display-bold" id="rB-v">100</div>
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeRocketBet(100)">+</button>
+                </div>
+            </div>
+            <button id="rock-btn" class="btn-luxury-center-gold-mega" onclick="window.launchRocket()">LAUNCH</button>
+            <div class="luxury-btn-unit-box right-side">
+                <span class="capsule-label-text-top">AUTO MULT</span>
+                <div class="capsule-row-flex-controls">
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeRocketMult(-0.5)">-</button>
+                    <div class="luxury-numeric-display-bold" id="rX-v">2.0x</div>
+                    <button class="btn-neon-luxury-capsule" onclick="window.changeRocketMult(0.5)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="room-referral" class="page-room">
+        <div class="ref-header-info"><h4><i class="fas fa-users" style="color:var(--c)"></i> <span>Total Verified Referrals:</span></h4><span style="font-weight:900; color:var(--g);">8 Invited</span></div>
+        <div id="ref-list-container" class="ref-list-box"></div>
+    </div>
+
+    <div id="room-tasks" class="page-room">
+        <div class="puzzle-container"><p>🧩 Fragment Assembly Bar (3 Tasks = 1 Full Card)</p><div class="puzzle-slots"><div class="puzzle-piece" id="p-piece0">Piece 1</div><div class="puzzle-piece" id="p-piece1">Piece 2</div><div class="puzzle-piece" id="p-piece2">Piece 3</div></div></div>
+        <div id="tasks-list-container" class="tasks-scroll-zone"></div>
+    </div>
+
+    <div id="room-wallet" class="page-room">
+        <h3>📥 Withdrawal Wallets:</h3>
+        <div class="wallet-row"><div class="wallet-title" style="color:#0088cc;">💎 TON Wallet Address</div><input type="text" class="wallet-input" placeholder="UQ..." id="w-ton"></div>
+        <div class="wallet-row"><div class="wallet-title" style="color:#f3ba2f;">💛 Binance ID</div><input type="text" class="wallet-input" placeholder="Binance ID..." id="w-binance"></div>
+        <div class="wallet-row"><div class="wallet-title" style="color:#cbd5e1;">🖤 OKX Address</div><input type="text" class="wallet-input" placeholder="0x..." id="w-okx"></div>
+        <button class="btn-save-addresses-neon" onclick="alert('Saved Securely!')">Save Addresses</button>
+    </div>
+</div>
+
+<nav id="real-bottom-nav">
+    <div class="nav-i active" id="nv-mining" onclick="window.fmcTabRouter('mining')"><i class="fas fa-hammer"></i><span>MINING</span></div>
+    <div class="nav-i" id="nv-games" onclick="window.fmcTabRouter('games')"><i class="fas fa-gamepad"></i><span>GAMES</span></div>
+    <div class="nav-i" id="nv-tasks" onclick="window.fmcTabRouter('tasks')"><i class="fas fa-tv"></i><span>TASKS</span></div>
+    <div class="nav-i" id="nv-referral" onclick="window.fmcTabRouter('referral')"><i class="fas fa-user-plus"></i><span>REFERRAL</span></div>
+    <div class="nav-i" id="nv-wallet" onclick="window.fmcTabRouter('wallet')"><i class="fas fa-wallet"></i><span>WALLET</span></div>
+</nav>
+
+<script>
+    localStorage.clear();
+
+    window.fmc_lang = 'en'; window.fmc_balance = 250000; window.fmc_cards = 40; window.currentEnergy = 500; window.totalAutoMiningSpeed = 0; window.isWalletConnected = false; window.puzzleProgressCount = 0;
+    window.slotLinesActive = 1; window.slotLineBetAmount = 50; window.rocketBetAmount = 100; window.rocketTargetMultiplier = 2.0; window.isSlotSpinningActive = false; window.isRocketFlyingActive = false; window.hasUserCashedOutLive = false;
+    
+    window.fmc_slots_profit = 0; window.fmc_greedy_profit = 0; window.fmc_rocket_profit = 0;
+
+    let dailyRewards = [100, 200, 300, 400, 500, 1000, 2500];
+    const icons = ['🍉','🍋','🍒','🍎','🍇','💎','🍔','🔔','🎰'];
+    const paylinesConfig = [{ cells: [0, 1, 2] }, { cells: [3, 4, 5] }, { cells: [6, 7, 8] }, { cells: [0, 3, 6] }, { cells: [1, 4, 7] }, { cells: [2, 5, 8] }, { cells: [0, 4, 8] }, { cells: [6, 4, 2] }, { cells: [3, 1, 5] }];
+
+    let greedySelectedChipBet = 10; let isGreedyDrawingActive = false; let greedyPlayerBets = Array(8).fill(0); let greedyTimerCount = 30;
+    const greedyItemsConfig = [
+        { name: "فرخة", emoji: "🐔", mult: 25, angle: 0 }, { name: "فلفل", emoji: "🌶️", mult: 5, angle: 45 },    
+        { name: "جمبري", emoji: "🍤", mult: 15, angle: 90 }, { name: "جزر", emoji: "🥕", mult: 5, angle: 135 },    
+        { name: "بقرة", emoji: "🐄", mult: 20, angle: 180 }, { name: "طماطم", emoji: "🍅", mult: 5, angle: 225 },  
+        { name: "سمك", emoji: "🐟", mult: 15, angle: 270 }, { name: "بروكلي", emoji: "🥦", mult: 5, angle: 315 }  
+    ];
+
+    let refMilestones = [
+        { count: 3, reward: 5, icon: "🥉" }, { count: 5, reward: 10, icon: "🥈" }, { count: 7, reward: 15, icon: "🥇" },
+        { count: 10, reward: 25, icon: "💎" }, { count: 15, reward: 40, icon: "👑" }, { count: 20, reward: 60, icon: "🚀" },
+        { count: 25, reward: 80, icon: "🔥" }, { count: 30, reward: 100, icon: "⚡" }, { count: 50, reward: 200, icon: "🔮" }, { count: 100, reward: 500, icon: "👑" }
+    ];
+
+    window.updateUI = function() {
+        if(document.getElementById('b-v')) document.getElementById('b-v').innerText = window.fmc_balance.toLocaleString();
+        if(document.getElementById('c-v')) document.getElementById('c-v').innerText = window.fmc_cards.toLocaleString();
+        if(document.getElementById('eg-v')) document.getElementById('eg-v').innerText = window.currentEnergy;
+        
+        if(document.getElementById('slot-profit-v')) document.getElementById('slot-profit-v').innerText = window.fmc_slots_profit.toLocaleString();
+        if(document.getElementById('greedy-profit-v')) document.getElementById('greedy-profit-v').innerText = window.fmc_greedy_profit.toLocaleString();
+        if(document.getElementById('rocket-profit-v')) document.getElementById('rocket-profit-v').innerText = window.fmc_rocket_profit.toLocaleString();
+        if(document.getElementById('greedy-wallet-v')) document.getElementById('greedy-wallet-v').innerText = window.fmc_balance.toLocaleString();
+        window.updateGameUIValues();
+    };
+
+    window.updateGameUIValues = function() {
+        if(document.getElementById('sL-v-internal')) document.getElementById('sL-v-internal').innerText = window.slotLinesActive;
+        if(document.getElementById('sB-v-internal')) document.getElementById('sB-v-internal').innerText = window.slotLineBetAmount;
+        if(document.getElementById('rB-v')) document.getElementById('rB-v').innerText = window.rocketBetAmount;
+        if(document.getElementById('rX-v')) document.getElementById('rX-v').innerText = window.rocketTargetMultiplier.toFixed(1) + 'x';
+    };
+
+    window.tapClickerMega = function() {
+        if(window.currentEnergy < 1) return;
+        window.currentEnergy = Math.max(0, window.currentEnergy - 1);
+        window.fmc_balance = Math.round((window.fmc_balance + 0.1) * 10) / 10;
+        window.updateUI();
+    };
+
+    window.fmcTabRouter = function(tab) {
+        document.querySelectorAll('.page-room').forEach(p => p.classList.remove('active')); 
+        document.querySelectorAll('.nav-i').forEach(n => n.classList.remove('active')); 
+        let r = document.getElementById('room-'+tab); if(r) r.classList.add('active'); 
+        let nv = document.getElementById('nv-'+tab); if(nv) nv.classList.add('active'); 
+        window.updateUI();
+    };
+
+    window.switchMainTab = function(tab) { window.fmcTabRouter(tab); };
+
+    window.triggerStatusToast = function(isWin, amountText) {
+        const winEl = document.getElementById('global-winner-toast'); const loseEl = document.getElementById('global-loser-toast');
+        if(isWin) { winEl.innerText = `🎉 WINNER +${amountText} FMC`; winEl.style.display = 'block'; setTimeout(() => winEl.style.display = 'none', 3000); } 
+        else { loseEl.style.display = 'block'; setTimeout(() => loseEl.style.display = 'none', 2500); }
+    };
+
+    window.drawNeonPaylines = function(linesArray) {
+        const c = document.getElementById('slot-canvas'); if(!c) return; const ctx = c.getContext('2d'); const p = document.getElementById('slot-grid-parent');
+        c.width = p.clientWidth; c.height = p.clientHeight; ctx.lineWidth = 5; ctx.strokeStyle = '#39ff14';
+        linesArray.forEach(idx => {
+            ctx.beginPath();
+            paylinesConfig[idx].cells.forEach((cellIdx, pIdx) => {
+                let cell = document.getElementById('c' + cellIdx);
+                let x = cell.offsetLeft + (cell.clientWidth / 2); let y = cell.offsetTop + (cell.clientHeight / 2);
+                if (pIdx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        });
+        setTimeout(() => { ctx.clearRect(0,0,c.width,c.height); }, 2500);
+    };
+
+    window.buildGreedyArenaUI = function() {
+        const arena = document.getElementById('greedy-circle-arena'); if(!arena) return; arena.innerHTML = '';
+        greedyItemsConfig.forEach((item, i) => {
+            const rad = (item.angle - 90) * (Math.PI / 180); const node = document.createElement('div'); node.className = 'greedy-node'; node.id = 'g-node-' + i;
+            node.style.left = `calc(50% + ${Math.cos(rad) * 110}px - 26px)`; node.style.top = `calc(50% + ${Math.sin(rad) * 110}px - 26px)`;
+            node.innerHTML = `${item.emoji}<div class="node-red-bet" id="g-bet-${i}">0</div><div class="node-mult-badge">x${item.mult}</div>`;
+            node.onclick = () => {
+                if(isGreedyDrawingActive) return;
+                let currentTotalBets = greedyPlayerBets.filter(b => b > 0).length;
+                if (greedyPlayerBets[i] === 0 && currentTotalBets >= 6) { alert("🚨 Max 6 items allowed on arena!"); return; }
+                if(window.fmc_balance < greedySelectedChipBet) { alert("No Balance!"); return; }
+                window.fmc_balance -= greedySelectedChipBet; greedyPlayerBets[i] += greedySelectedChipBet; window.updateUI(); window.renderGreedyBetsUI();
+            };
+            arena.appendChild(node);
+        });
+        window.renderGreedyBetsUI();
+    };
+
+    window.renderGreedyBetsUI = function() { greedyItemsConfig.forEach((item, i) => { const bEl = document.getElementById('g-bet-' + i); if(bEl) { if(greedyPlayerBets[i] > 0) { bEl.innerText = greedyPlayerBets[i].toLocaleString(); bEl.style.display = 'block'; } else { bEl.style.display = 'none'; } } }); };
+    window.setGreedyBetChip = function(amt, btn) { greedySelectedChipBet = parseInt(amt); document.querySelectorAll('.btn-coin-select').forEach(b => b.classList.remove('selected-bet-chip')); if(btn) btn.classList.add('selected-bet-chip'); };
+    
+    window.confirmCustomOtherBet = function() {
+        const val = parseInt(document.getElementById('greedy-custom-input-field').value);
+        if(!isNaN(val) && val > 0) { greedySelectedChipBet = val; alert("👍 Bet Amount Confirmed!"); document.querySelectorAll('.btn-coin-select').forEach(b => b.classList.remove('selected-bet-chip')); }
+    };
+
+    window.startGreedyDraw = function() {
+        if(isGreedyDrawingActive) return; isGreedyDrawingActive = true;
+        let finalWinIdx = 0; let rng = Math.random();
+        if (rng < 0.04) { finalWinIdx = 0; } else if (rng < 0.10) { finalWinIdx = 4; } else {
+            let safeVegIndices = [1, 2, 3, 5, 6, 7]; finalWinIdx = safeVegIndices[Math.floor(Math.random() * safeVegIndices.length)];
+        }
+        let currentIndex = 0; let totalTicks = 24 + finalWinIdx;
+        function tickAnimation() {
+            document.querySelectorAll('.greedy-node').forEach(n => n.classList.remove('active-spin'));
+            let activeNode = document.getElementById('g-node-' + (currentIndex % 8)); if(activeNode) activeNode.classList.add('active-spin');
+            totalTicks--;
+            if(totalTicks > 0) { currentIndex++; setTimeout(tickAnimation, 70); } 
+            else {
+                let winIdx = currentIndex % 8; let winConfig = greedyItemsConfig[winIdx]; let playerBet = greedyPlayerBets[winIdx];
+                let hasBetOnMeat = greedyPlayerBets[0] > 0 || greedyPlayerBets[4] > 0 || greedyPlayerBets[2] > 0;
+                let hasBetOnVeg = greedyPlayerBets[1] > 0 || greedyPlayerBets[3] > 0 || greedyPlayerBets[5] > 0;
+                let totalInvestedOnRound = greedyPlayerBets.reduce((a,b)=>a+b, 0);
+                
+                if(playerBet > 0) {
+                    let payout = playerBet * winConfig.mult;
+                    if (hasBetOnMeat && hasBetOnVeg) { payout = Math.floor(payout * 1.5); }
+                    window.fmc_balance += payout; 
+                    window.fmc_greedy_profit += (payout - totalInvestedOnRound); 
+                    window.triggerStatusToast(true, payout.toLocaleString());
+                } else if(totalInvestedOnRound > 0) {
+                    window.fmc_greedy_profit -= totalInvestedOnRound; window.triggerStatusToast(false, "0");
+                }
+                
+                const gHist = document.getElementById('greedy-hist-bar');
+                if(gHist) { const chip = document.createElement('div'); chip.className = playerBet > 0 ? "hist-chip win" : "hist-chip"; chip.innerText = `${winConfig.emoji} x${winConfig.mult}`; gHist.prepend(chip); if(gHist.children.length > 8) gHist.removeChild(gHist.lastChild); }
+                greedyPlayerBets = Array(8).fill(0); isGreedyDrawingActive = false; window.updateUI(); window.buildGreedyArenaUI();
+            }
+        }
+        tickAnimation();
+    };
+
+    window.buildDailyGridUI = function() {
+        const box = document.getElementById('daily-days-grid-box'); if(!box) return; box.innerHTML = '';
+        let currentClaimedDay = parseInt(localStorage.getItem('fmc_claimed_day_idx') || '0');
+        let lastClaimTimestamp = parseInt(localStorage.getItem('fmc_last_claim_timestamp') || '0');
+        
+        let isWaitingPeriodOver = (Date.now() - lastClaimTimestamp) >= 24 * 60 * 60 * 1000;
+        if (lastClaimTimestamp === 0) isWaitingPeriodOver = true;
+        
+        for (let i = 1; i <= 7; i++) {
+            const dayBox = document.createElement('div'); dayBox.className = 'daily-day-box'; dayBox.innerHTML = `<i class="fas fa-box-open"></i><b>Day ${i}</b>`;
+            if (i <= currentClaimedDay) { dayBox.classList.add('claimed'); } 
+            else if (i === currentClaimedDay + 1) {
+                dayBox.classList.add('active-day');
+                dayBox.onclick = () => {
+                    if(i === 1) { window.fmc_cards += 2; alert('🎁 Day 1 Box Opened: +2 Free Cards Added!'); } 
+                    else if(i === 2) { window.fmc_cards += 5; alert('🎁 Day 2 Box Opened: +5 Free Cards Added!'); } 
+                    else if(i === 3) { window.fmc_cards += 8; alert('🎁 Day 3 Box Opened: +8 Free Cards Added!'); } 
+                    else { window.fmc_balance += dailyRewards[i-1]; }
+                    localStorage.setItem('fmc_claimed_day_idx', i.toString());
+                    localStorage.setItem('fmc_last_claim_timestamp', Date.now().toString());
+                    window.buildDailyGridUI(); window.updateUI();
+                };
+            }
+            box.appendChild(dayBox);
+        }
+    };
+    
+    window.toggleGiftModal = function() { 
+        let m = document.getElementById('daily-login-hub'); if(!m) return;
+        m.style.display = (m.style.display==='flex')?'none':'flex'; 
+        if(m.style.display==='flex') window.buildDailyGridUI(); 
+    };
+    window.connectTonWallet = function() { window.isWalletConnected = !window.isWalletConnected; document.getElementById('ton-connect-btn').classList.toggle('connected', window.isWalle
